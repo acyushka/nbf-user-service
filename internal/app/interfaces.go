@@ -5,15 +5,14 @@ import (
 	"nbf-user/internal/models"
 
 	"github.com/google/uuid"
-	userv1 "github.com/hesoyamTM/nbf-protos/gen/go/user"
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error)
-	GetUser(ctx context.Context, req *userv1.GetUserRequest) (*userv1.GetUserResponse, error)
-	GetUsers(ctx context.Context, req *userv1.GetUsersRequest) (*userv1.GetUsersResponse, error)
-	UpdateUser(ctx context.Context, req *userv1.UpdateUserRequest) (*userv1.UpdateUserResponse, error)
-	DeleteUser(ctx context.Context, req *userv1.DeleteUserRequest) (*userv1.DeleteUserResponse, error)
+	CreateUser(ctx context.Context, NewUser *models.User) error
+	GetUser(ctx context.Context, UserID uuid.UUID) (*models.User, error)
+	GetUsers(ctx context.Context, ids []uuid.UUID) ([]*models.User, error)
+	UpdateUser(ctx context.Context, UserModel *models.User) error
+	DeleteUser(ctx context.Context, UserID uuid.UUID) error
 }
 
 type UserDatabase interface {

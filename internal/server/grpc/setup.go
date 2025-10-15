@@ -28,11 +28,11 @@ func NewGrpcServer(ctx context.Context, db *sqlx.DB, cfg *config.Config) (*GrpcS
 	userRepo := postgres.NewUserRepo(db)
 
 	// Init UserService
-	//там логика всего микросервиса
+	//там общение с адаптерами
 	userService := app.NewUserService(userRepo)
 
 	// Init UserServer
-	// Там обертка под интерфейс юзер сервиса
+	// Там слой презентации
 	userServer := NewUserServer(userService)
 
 	// Init interceptor
