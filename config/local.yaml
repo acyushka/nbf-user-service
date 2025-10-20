@@ -1,6 +1,6 @@
 env: 'dev'
 host: "localhost"
-port: 60000
+port: 60001
 
 database:
   host: "localhost"

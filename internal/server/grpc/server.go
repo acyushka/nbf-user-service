@@ -32,12 +32,17 @@ func (s *UserServer) CreateUser(ctx context.Context, req *userv1.CreateUserReque
 		return nil, err
 	}
 
+	UserID, err := parseUserID(userInfo.GetId())
+	if err != nil {
+		return nil, err
+	}
+
 	NewUser := &models.User{
-		ID:          uuid.New(),
-		Name:        userInfo.Name,
-		Surname:     userInfo.Surname,
-		Contacts:    userInfo.Contacts,
-		Description: userInfo.Description,
+		ID:          UserID,
+		Name:        userInfo.GetName(),
+		Surname:     userInfo.GetSurname(),
+		Contacts:    userInfo.GetContacts(),
+		Description: userInfo.GetDescription(),
 	}
 
 	if err := s.userService.CreateUser(ctx, NewUser); err != nil {
@@ -60,7 +65,7 @@ func (s *UserServer) GetUser(ctx context.Context, req *userv1.GetUserRequest) (*
 	}
 
 	return &userv1.GetUserResponse{
-		User: convertToUserInfo(userModel),
+		User: convertToUserResponse(userModel),
 	}, nil
 }
 
@@ -87,7 +92,7 @@ func (s *UserServer) GetUsers(ctx context.Context, req *userv1.GetUsersRequest) 
 
 	response := &userv1.GetUsersResponse{}
 	for _, userModel := range users {
-		response.Users = append(response.Users, convertToUserInfo(userModel))
+		response.Users = append(response.Users, convertToUserResponse(userModel))
 	}
 
 	return response, nil
@@ -107,10 +112,10 @@ func (s *UserServer) UpdateUser(ctx context.Context, req *userv1.UpdateUserReque
 
 	userModel := &models.User{
 		ID:          userID,
-		Name:        userInfo.Name,
-		Surname:     userInfo.Surname,
-		Contacts:    userInfo.Contacts,
-		Description: userInfo.Description,
+		Name:        userInfo.GetName(),
+		Surname:     userInfo.GetSurname(),
+		Contacts:    userInfo.GetContacts(),
+		Description: userInfo.GetDescription(),
 	}
 
 	if err := s.userService.UpdateUser(ctx, userModel); err != nil {
@@ -137,6 +142,9 @@ func (s *UserServer) DeleteUser(ctx context.Context, req *userv1.DeleteUserReque
 // ВНУТРЯНКА
 
 func validateUserInfo(userInfo *userv1.UserInfo) error {
+	if userInfo.GetId() == "" {
+		return status.Error(codes.InvalidArgument, "User id is empty")
+	}
 	if userInfo.GetName() == "" {
 		return status.Error(codes.InvalidArgument, "User name is empty")
 	}
@@ -159,7 +167,7 @@ func parseUserID(id string) (uuid.UUID, error) {
 	return userID, nil
 }
 
-func convertToUserInfo(userModel *models.User) *userv1.UserInfo {
+func convertToUserResponse(userModel *models.User) *userv1.UserInfo {
 	return &userv1.UserInfo{
 		Id:          userModel.ID.String(),
 		Name:        userModel.Name,
