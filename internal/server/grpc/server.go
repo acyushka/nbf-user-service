@@ -150,9 +150,6 @@ func validateUserInfo(userInfo *userv1.UserInfo) error {
 	if userInfo.GetName() == "" {
 		return status.Error(codes.InvalidArgument, "User name is empty")
 	}
-	if userInfo.GetSurname() == "" {
-		return status.Error(codes.InvalidArgument, "User surname is empty")
-	}
 	return nil
 }
 
