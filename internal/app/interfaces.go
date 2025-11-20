@@ -22,5 +22,3 @@ type UserDatabase interface {
 	Update(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
-
-//s3 interface

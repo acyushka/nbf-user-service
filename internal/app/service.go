@@ -13,10 +13,9 @@ type userService struct {
 	//s3 avatarStorage interface
 }
 
-func NewUserService(userRepo UserDatabase) *userService { //+s3
+func NewUserService(userRepo UserDatabase) *userService {
 	return &userService{
 		userRepo: userRepo,
-		//s3
 	}
 }
 
@@ -90,6 +89,9 @@ func updateUserModel(user *models.User, userModel *models.User) {
 	}
 	if len(userModel.Contacts) > 0 {
 		user.Contacts = userModel.Contacts
+	}
+	if userModel.Avatar != "" {
+		user.Avatar = userModel.Avatar
 	}
 	if userModel.Description != "" {
 		user.Description = userModel.Description

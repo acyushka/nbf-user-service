@@ -42,6 +42,7 @@ func (s *UserServer) CreateUser(ctx context.Context, req *userv1.CreateUserReque
 		Name:        userInfo.GetName(),
 		Surname:     userInfo.GetSurname(),
 		Contacts:    userInfo.GetContacts(),
+		Avatar:      "",
 		Description: userInfo.GetDescription(),
 	}
 
@@ -115,6 +116,7 @@ func (s *UserServer) UpdateUser(ctx context.Context, req *userv1.UpdateUserReque
 		Name:        userInfo.GetName(),
 		Surname:     userInfo.GetSurname(),
 		Contacts:    userInfo.GetContacts(),
+		Avatar:      userInfo.GetAvatar(),
 		Description: userInfo.GetDescription(),
 	}
 
@@ -173,6 +175,7 @@ func convertToUserResponse(userModel *models.User) *userv1.UserInfo {
 		Name:        userModel.Name,
 		Surname:     userModel.Surname,
 		Contacts:    userModel.Contacts,
+		Avatar:      userModel.Avatar,
 		Description: userModel.Description,
 	}
 }

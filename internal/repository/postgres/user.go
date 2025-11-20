@@ -23,8 +23,8 @@ func NewUserRepo(db *sqlx.DB) *UserRepo {
 
 func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
 	query := `
-        INSERT INTO users (id, name, surname, contacts, description)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO users (id, name, surname, contacts, avatar, description)
+        VALUES ($1, $2, $3, $4, $5, $6)
     `
 
 	_, err := r.db.ExecContext(ctx, query,
@@ -32,6 +32,7 @@ func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
 		user.Name,
 		user.Surname,
 		pq.Array(user.Contacts),
+		user.Avatar,
 		user.Description,
 	)
 	if err != nil {
@@ -45,7 +46,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.User, err
 	var user models.User
 	var contacts []string
 
-	query := `SELECT id, name, surname, contacts, description
+	query := `SELECT id, name, surname, contacts, avatar, description
 	          FROM users WHERE id = $1`
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
@@ -53,6 +54,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.User, err
 		&user.Name,
 		&user.Surname,
 		pq.Array(&contacts),
+		&user.Avatar,
 		&user.Description,
 	)
 	if err != nil {
@@ -76,11 +78,12 @@ func (r *UserRepo) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*models.Use
 		Name        string    `db:"name"`
 		Surname     string    `db:"surname"`
 		Contacts    []byte    `db:"contacts"`
+		Avatar      string    `db:"avatar"`
 		Description string    `db:"description"`
 	}
 
 	query, args, err := sqlx.In(`
-		SELECT id, name, surname, contacts, description
+		SELECT id, name, surname, contacts, avatar, description
 		FROM users
 		WHERE id IN (?)
 		ORDER BY name, surname
@@ -88,7 +91,9 @@ func (r *UserRepo) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*models.Use
 	if err != nil {
 		return nil, fmt.Errorf("Failed to build query: %w", err)
 	}
+
 	query = r.db.Rebind(query)
+
 	var rows []userRow
 	if err = r.db.SelectContext(ctx, &rows, query, args...); err != nil {
 		return nil, fmt.Errorf("Failed to get users by ids: %w", err)
@@ -106,6 +111,7 @@ func (r *UserRepo) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*models.Use
 			Name:        row.Name,
 			Surname:     row.Surname,
 			Contacts:    contacts,
+			Avatar:      row.Avatar,
 			Description: row.Description,
 		})
 	}
@@ -116,14 +122,15 @@ func (r *UserRepo) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*models.Use
 func (r *UserRepo) Update(ctx context.Context, user *models.User) error {
 	query := `
 		UPDATE users
-		SET name = $1, surname = $2, contacts = $3, description = $4
-		WHERE id = $5
+		SET name = $1, surname = $2, contacts = $3, avatar = $4, description = $5
+		WHERE id = $6
 	`
 
 	result, err := r.db.ExecContext(ctx, query,
 		user.Name,
 		user.Surname,
 		pq.Array(user.Contacts),
+		user.Avatar,
 		user.Description,
 		user.ID,
 	)
